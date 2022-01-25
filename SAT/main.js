@@ -3,9 +3,14 @@ const canvas = document.getElementById('canvas');
 /** @type {CanvasRenderingContext2D} */
 const ctx = canvas.getContext('2d');
 
+const acceleration = document.getElementById('acceleration');
+const velocity = document.getElementById('velocity');
+
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+const player = new Ball(200, 200, 30, 2, 1, true);
+new Ball(300, 200, 60, 10, 1, false);
 
 function mainLoop() {
     ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
@@ -24,11 +29,12 @@ function mainLoop() {
         b.display();
         b.update();
     })
+    acceleration.innerHTML = `Acceleration: ${Math.round(player.acc.magnitude())}`;
+    velocity.innerHTML = `Velocity: ${Math.round(player.vel.magnitude())}`
     requestAnimationFrame(mainLoop);
 }
 
-const player = new Ball(200, 200, 30, 2, true);
-new Ball(300, 200, 60, 0, false);
+
 
 window.addEventListener('keydown', e => Controller.handleKeys(e, player));
 window.addEventListener('keyup', e => Controller.handleKeys(e, player));
