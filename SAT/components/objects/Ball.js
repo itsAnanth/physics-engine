@@ -1,13 +1,25 @@
 // ball object
 
 class Ball {
-    constructor(x, y, r, mass, player) {
-        this.pos = new Vector(x, y)
-        this.r = r;
-        this.mass = mass;
-        this.inverse_mass = (mass <= 0) ? 0 : (1 / mass);
+    /**
+     * Creates a new ball object with collision detection
+     * @param {number} x x coordinate
+     * @param {number} y y coordinate
+     * @param {number} radius radius of the ball
+     * @param {number} mass mass of the ball
+     * @param {boolean} player whether the ball is controllable by user or not
+     */
+    constructor(x, y, radius, mass, elasticity = 1, player) {
+        /** @type {Vector} */
+        this.pos = new Vector(x, y);
         this.vel = new Vector(0, 0);
         this.acc = new Vector(0, 0);
+        /** @type {number} */
+        this.r = radius;
+        /** @type {number} */
+        this.mass = mass;
+        this.inverse_mass = (mass <= 0) ? 0 : (1 / mass);
+        this.elasticity = elasticity;
         this.acceleration = 1;
         this.player = player || false;
         Global.balls.push(this);
@@ -37,8 +49,18 @@ class Ball {
     display() {
         this.vel.drawVector(this.pos.x, this.pos.y, this.vel.magnitude(), "green");
         this.acc.unit().drawVector(this.pos.x, this.pos.y, this.acc.magnitude(), "blue");
+        ctx.textAlign = 'center';
+        ctx.fillStyle = 'black';
+        ctx.fillText(`mass = ${this.mass}`, this.pos.x, this.pos.y - this.r - 15);
+        ctx.fillText(`elasticiy = ${this.elasticity}`, this.pos.x, this.pos.y - this.r - 5)
     }
 
+    /**
+     * Checks collision between two ball entities
+     * @param {Ball} b1 
+     * @param {Ball} b2 
+     * @returns {boolean} Whether the balls are colliding or not
+     */
     static collision(b1, b2) {
         return (b1.r + b2.r >= b2.pos.subtract(b1.pos).magnitude());
     }
