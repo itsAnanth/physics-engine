@@ -16,8 +16,7 @@ class Ball {
      *      acceleration: number
      * }} x player object creation payload
      */
-    constructor({ id, x, y, radius, mass, elasticity, parent, isPlayer, friction, damageOnCollision, health, type, acceleration, color }) {
-        this.id = id;
+    constructor({ x, y, radius, mass, elasticity, parent, isPlayer, friction, damageOnCollision, health, type, acceleration, color }) {
         /** @type {Vector} */
         this.pos = new Vector(x, y);
         this.vel = new Vector(0, 0);
@@ -51,6 +50,10 @@ class Ball {
         ctx.fillStyle = this.color;
         ctx.fill();
         ctx.closePath();
+    }
+
+    moveTo(v) {
+        this.vel = Vector.subtract(v, this.pos).unit().multiply(this.acceleration);
     }
 
     displayHealth() {
