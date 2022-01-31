@@ -12,6 +12,20 @@ canvas.height = window.innerHeight;
 const players = [];
 const bullets = [];
 
+class Player extends Ball {
+    constructor(id, obj) {
+        super(obj);
+        this.id = id;
+        this.alive = true;
+    }
+};
+
+let po = Player.prototype.destroy;
+Player.prototype.destroy = function() {
+    this.alive = false;
+    po.apply(this, arguments);
+}
+
 
 class Bullet extends Ball {
     /**
@@ -40,15 +54,23 @@ class Bullet extends Ball {
     update() {
         this.pos = Vector.add(this.pos, this.vel);
     }
+
 }
 
-const player = new Ball({ id: 0, x: canvas.width / 2, y: canvas.height / 2, isPlayer: true, parent: players, mass: 8, radius: 15, type: 'player', acceleration: 0.5, damageOnCollision: false });
-const enemy = new Ball({ id: 1, x: 300, y: 300, isPlayer: false, parent: players, radius: 20, mass: 10, type: 'player', color: 'blue', damageOnCollision: false });
+const player = new Player(0, { x: canvas.width / 2, y: canvas.height / 2, isPlayer: true, parent: players, mass: 8, radius: 15, type: 'player', acceleration: 0.5, damageOnCollision: false });
+const enemy = new Player(1, { id: 1, x: 300, y: 300, isPlayer: false, parent: players, radius: 20, mass: 15, type: 'player', color: 'blue', damageOnCollision: false });
 
-// setInterval(() => {
-//     const mouse = new Vector(player.pos.x, player.pos.y);
-//     new Bullet(enemy.id, mouse, { color: enemy.color, x: enemy.pos.x, y: enemy.pos.y, radius: 5, parent: bullets })
-// }, 1000)
+enemy.update = function() {
+    this.pos = Vector.add(this.pos, this.vel);
+}
+
+let int = setInterval(() => {
+    if (!enemy.alive) clearInterval(int);
+    const mouse = new Vector(player.pos.x, player.pos.y);
+    new Bullet(enemy.id, mouse, { color: enemy.color, x: enemy.pos.x, y: enemy.pos.y, radius: 5, parent: bullets })
+    enemy.vel = Vector.subtract(player.pos, enemy.pos).unit().multiply(3);
+    // enemy.moveTo(new Vector(player.pos.x, player.pos.y))
+}, 500)
   
 function mainLoop() {
     ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
@@ -63,12 +85,12 @@ function mainLoop() {
             if (Ball.collision(ball_1, ball_2)) {
                 const player = ball_1.type == 'player' ? ball_1 : ball_2;
                 const bullet = ball_1.type == 'bullet' ? ball_1 : ball_2;
-                console.log(bullet, player)
+       
                 if (bullet && player && (bullet.damageOnCollision || player.damageOnCollision)) {
-                    console.log('ye')
                     player.health -= bullet.damage;
                     bullet.destroy();
-                    if (player.health <= 0) player.destroy();
+                    if (player.health <= 0)
+                        player.destroy();
                     continue;
                 }
                 Ball.penetration_resolution(ball_1, ball_2);
@@ -76,13 +98,6 @@ function mainLoop() {
             }
         }
 
-        // Global.walls.forEach((wall) => {
-        //     if (Wall.collision(Global.balls[index], wall)) {
-        //         Wall.penetration_resolution(Global.balls[index], wall);
-        //         Wall.collision_resolution(Global.balls[index], wall)
-        //     }
-        // })
-        // b.display();
         if (b.type == 'player') b.displayHealth();
         b.update();
     });
