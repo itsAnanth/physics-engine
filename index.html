@@ -24,6 +24,7 @@
             padding: 0;
             overflow: hidden;
             font-family: 'Courier Prime', monospace;
+            user-select: none;
         }
 
         .info-container {
@@ -67,7 +68,7 @@
             height: 100vh;
             text-align: center;
             font-size: 100px;
-            transition: all 1s ease;
+            transition: all 2s ease;
             opacity: 0;
             color: white;
             display: flex;
@@ -87,7 +88,7 @@
         <div id="velocity">Velocity: 0</div>
     </div>
     <div id="right-container">
-        <div id="count">0</div>
+        <div id="count">0 Alive</div>
     </div>
     <canvas id="canvas"></canvas>
 
