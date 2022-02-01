@@ -16,12 +16,11 @@ class Ball {
      *      acceleration: number
      * }} x player object creation payload
      */
-    constructor({ x, y, radius, mass, elasticity, parent, isPlayer, friction, damageOnCollision, health, type, acceleration, color }) {
+    constructor({ x, y, radius, mass, elasticity, parent, isPlayer, friction, damageOnCollision, acceleration, color }) {
         /** @type {Vector} */
         this.pos = new Vector(x, y);
         this.vel = new Vector(0, 0);
         this.acc = new Vector(0, 0);
-        this.health = health ?? 100;
         /** @type {number} */
         this.r = radius ?? 10;
         /** @type {number} */
@@ -33,7 +32,6 @@ class Ball {
         this.friction = friction ?? Global.FRICTION;
         this.parent = parent;
         this.damageOnCollision = damageOnCollision ?? false;
-        this.type = type ?? 'entity';
         this.color = color ?? 'red';
         parent.push(this);
     }
@@ -42,9 +40,9 @@ class Ball {
     /**
      * main renderer
      */
-    drawBall() {
+    drawBall(x = this.pos.x, y = this.pos.y) {
         ctx.beginPath();
-        ctx.arc(this.pos.x, this.pos.y, this.r, 0, Angle.toRadians(360));
+        ctx.arc(x, y, this.r, 0, Angle.toRadians(360));
         ctx.strokeStyle = "black";
         ctx.stroke();
         ctx.fillStyle = this.color;
@@ -56,10 +54,10 @@ class Ball {
         this.vel = Vector.subtract(v, this.pos).unit().multiply(this.acceleration);
     }
 
-    displayHealth() {
+    displayHealth(x = this.pos.x, y = this.pos.y) {
         ctx.textAlign = 'center';
         ctx.fillStyle = 'black';
-        ctx.fillText(`HP - ${this.health}`, this.pos.x, this.pos.y - this.r - 15);
+        ctx.fillText(`HP - ${this.health}`, x, y - this.r - 15);
     }
 
     update() {
