@@ -39,7 +39,8 @@ class Player extends Ball {
         ctx.fillStyle = 'black';
         ctx.fillRect(0 - 25, - this.r * 2 - 10, 50, 10);
         ctx.fillStyle = color;
-        ctx.fillRect(0 - 22, - this.r * 2 - 8.8, 44 * this.health / 100, 8)
+        const fillVal = 44 * this.health / 100
+        ctx.fillRect(0 - 22, - this.r * 2 - 8.8, Math.max(0, fillVal), 8)
         ctx.restore();
     }
 };
@@ -71,7 +72,7 @@ class Bullet extends Ball {
         super(obj);
         this.id = id;
         this.friction = 0;
-        this.vel = Vector.subtract(destination, this.pos).unit().multiply(20);
+        this.vel = Vector.subtract(destination, this.pos).unit().multiply(10);
         this.damage = 10;
         this.damageOnCollision = true;
         this.type = 'bullet';
@@ -92,7 +93,8 @@ for (let i = 0; i < 5; i++) {
     enemyObj.x += Math.floor(Math.random() * 200) + 500;
     enemyObj.y += Math.floor(Math.random() * 200) + 500;
     enemyObj.acceleration = Math.floor(Math.random() * 5);
-    new Player(i + 1, 100, enemyObj)
+    const enemy = new Player(i + 1, 100, enemyObj);
+    enemy.lastStamp = Date.now();
 }
 
 // new Player(1, 100, );
@@ -105,11 +107,21 @@ for (let i = 0; i < 5; i++) {
 let int = setInterval(() => {
     enemies.forEach(enemy => {
         if (!enemy.alive) clearInterval(int);
-        // const mouse = new Vector(player.pos.x, player.pos.y);
-        // new Bullet(enemy.id, mouse, { color: enemy.color, x: enemy.pos.x, y: enemy.pos.y, radius: 5, parent: bullets })
+        const diff = Date.now() - enemy.lastStamp
+        console.log(diff)
+        if (diff > 1000) {
+            const mouse = new Vector(player.pos.x, player.pos.y);
+            new Bullet(enemy.id, mouse, { color: enemy.color, x: enemy.pos.x, y: enemy.pos.y, radius: 5, parent: bullets })
+            enemy.lastStamp = Date.now();
+        }
+
+
         enemy.vel = Vector.subtract(player.pos, enemy.pos).unit().multiply(enemy.acceleration);
         // enemy.moveTo(new Vector(player.pos.x, player.pos.y))
-        enemy.angle = Math.atan2(player.pos.y, player.pos.x)
+        const dv = Vector.subtract(player.pos, enemy.pos).unit();
+        const radians = -Math.atan2(dv.x, dv.y) + Angle.toRadians(180)
+        enemy.angle = radians;
+        // console.log(radians)
     })
 }, 50)
 
@@ -123,11 +135,11 @@ function mainLoop() {
     const all = [player, ...bullets.concat(enemies)];
     all.forEach((b, index) => {
         Renderer.renderEnemies(player, b, (x, y) => {
-            b.drawBall(x, y);
             if (b.type == 'player') {
                 b.healthbar(x, y, b.id == 0 ? 'lightgreen' : 'red');
                 b.rotate(x, y);
             }
+            b.drawBall(x, y);
 
         })
         for (let i = index + 1; i < all.length; i++) {
@@ -141,7 +153,7 @@ function mainLoop() {
                 if (bullet && player && (bullet.damageOnCollision || player.damageOnCollision)) {
                     player.health -= bullet.damage;
                     bullet.destroy();
-                    console.log(player.health)
+                    // console.log(player.health)
                     if (player.health <= 0)
                         player.destroy();
                     continue;
