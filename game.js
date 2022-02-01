@@ -1,3 +1,4 @@
+const count = document.getElementById('count');
 const go = document.getElementById('go');
 /** @type {HTMLCanvasElement} */
 const canvas = document.getElementById('canvas');
@@ -108,7 +109,6 @@ let int = setInterval(() => {
     enemies.forEach(enemy => {
         if (!enemy.alive) clearInterval(int);
         const diff = Date.now() - enemy.lastStamp
-        console.log(diff)
         if (diff > 1000) {
             const mouse = new Vector(player.pos.x, player.pos.y);
             new Bullet(enemy.id, mouse, { color: enemy.color, x: enemy.pos.x, y: enemy.pos.y, radius: 5, parent: bullets })
@@ -121,18 +121,23 @@ let int = setInterval(() => {
         const dv = Vector.subtract(player.pos, enemy.pos).unit();
         const radians = -Math.atan2(dv.x, dv.y) + Angle.toRadians(180)
         enemy.angle = radians;
-        // console.log(radians)
     })
 }, 50)
 
 function mainLoop() {
-    if (!player.alive) return go.style.opacity = 1;
+    if (!player.alive || enemies.length == 0) {
+        if (enemies.length == 0) go.innerHTML = 'You Won!';
+        go.style.opacity = 1;
+        return;
+    }
+
     ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
     Renderer.renderWorld(player)
     // player.rotate();
     // player.healthbar();
     player.registerControls()
     const all = [player, ...bullets.concat(enemies)];
+    count.innerHTML = `${enemies.length + 1} Alive`;
     all.forEach((b, index) => {
         Renderer.renderEnemies(player, b, (x, y) => {
             if (b.type == 'player') {
@@ -170,6 +175,12 @@ function mainLoop() {
     acceleration.innerHTML = `Acceleration: ${Math.round(player.acc.magnitude())}`;
     velocity.innerHTML = `Velocity: ${Math.round(player.vel.magnitude())}`
     requestAnimationFrame(mainLoop);
+}
+
+function getParticles({ x, y }, particles) {
+    const dx = particles.filter(p => p.pos.x <= Global.drawDistance.x + x && p.pos.x >= x - Global.drawDistance.x - Global.drawDistance.buffer)
+    const dy = dx.filter(p => p.pos.y <= Global.drawDistance.y + y && p.pos.y >= y - Global.drawDistance.y - Global.drawDistance.buffer);
+    return dy;
 }
 
 
