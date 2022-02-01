@@ -1,4 +1,4 @@
-class Global {}
+class Global { }
 
 Global.FRICTION = 0.05;
 Global.ELASTICITY = 1;
@@ -12,4 +12,10 @@ Global.CONTROLS = {
     RIGHT: false,
     UP: false,
     DOWN: false
+}
+
+Global.drawDistance = {
+    x: canvas.width / 2,
+    y: canvas.height / 2,
+    buffer: 300
 }
