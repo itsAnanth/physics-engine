@@ -201,6 +201,8 @@ window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 });
+
+// resize
 window.addEventListener('click', e => {
     const dx = e.clientX + player.pos.x - window.innerWidth / 2;
     const dy = e.clientY + player.pos.y - window.innerHeight / 2;
