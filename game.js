@@ -197,18 +197,21 @@ function getParticles({ x, y }, particles) {
 
 window.addEventListener('keydown', e => Controller.handleKeys(e, player));
 window.addEventListener('keyup', e => Controller.handleKeys(e, player));
-
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
 window.addEventListener('click', e => {
     const dx = e.clientX + player.pos.x - window.innerWidth / 2;
     const dy = e.clientY + player.pos.y - window.innerHeight / 2;
     const mouse = new Vector(dx, dy);
     new Bullet(player.id, mouse, { x: player.pos.x, y: player.pos.y, radius: 5, parent: bullets, color: player.color })
-})
+});
 
 window.addEventListener('mousemove', e => {
     const radians = Math.atan2(e.clientX - window.innerWidth / 2, window.innerHeight / 2 - e.clientY);
     player.angle = radians;
-})
+});
 
 
 requestAnimationFrame(mainLoop);

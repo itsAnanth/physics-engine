@@ -19,3 +19,8 @@ Global.drawDistance = {
     y: canvas.height / 2,
     buffer: 300
 }
+
+Global.turret = {
+    width: 20,
+    height: 30
+}
