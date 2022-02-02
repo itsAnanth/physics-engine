@@ -11,6 +11,7 @@ const velocity = document.getElementById('velocity');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+const ballTags = ['player', 'bullet']
 const players = [];
 const bullets = [];
 const enemies = [];
@@ -46,11 +47,23 @@ class Player extends Ball {
     }
 };
 
-let po = Player.prototype.destroy, db = Player.prototype.drawBall;
+let po = Player.prototype.destroy, pu = Player.prototype.update;
 
 Player.prototype.destroy = function () {
     this.alive = false;
     po.apply(this, arguments);
+}
+
+Player.prototype.update = function() {
+    pu.apply(this, arguments)
+    if (this.pos.x < 0) 
+        this.pos = new Vector(0, this.pos.y);
+    else if (this.pos.x > 3000)
+        this.pos = new Vector(3000, this.pos.y);
+    else if (this.pos.y < 0)
+        this.pos = new Vector(this.pos.x, 0);
+    else if (this.pos.y > 3000)
+        this.pos = new Vector(this.pos.x, 3000);
 }
 
 
@@ -93,17 +106,14 @@ const enemyObj = { x: canvas.width / 2, y: canvas.height / 2, isPlayer: false, p
 for (let i = 0; i < 5; i++) {
     enemyObj.x += Math.floor(Math.random() * 200) + 500;
     enemyObj.y += Math.floor(Math.random() * 200) + 500;
-    enemyObj.acceleration = Math.floor(Math.random() * 5);
+    enemyObj.acceleration = Math.floor(Math.random() * 3) + 3;
     const enemy = new Player(i + 1, 100, enemyObj);
     enemy.lastStamp = Date.now();
+
 }
 
-// new Player(1, 100, );
-// new Player(2, 100, { x: canvas.width / 2 - 100, y: canvas.height / 2, isPlayer: false, parent: enemies, radius: 20, mass: 15, color: 'blue', damageOnCollision: false });
 
-// enemy.update = function() {
-//     this.pos = Vector.add(this.pos, this.vel);
-// }
+
 
 let int = setInterval(() => {
     enemies.forEach(enemy => {
@@ -117,7 +127,6 @@ let int = setInterval(() => {
 
 
         enemy.vel = Vector.subtract(player.pos, enemy.pos).unit().multiply(enemy.acceleration);
-        // enemy.moveTo(new Vector(player.pos.x, player.pos.y))
         const dv = Vector.subtract(player.pos, enemy.pos).unit();
         const radians = -Math.atan2(dv.x, dv.y) + Angle.toRadians(180)
         enemy.angle = radians;
@@ -133,11 +142,11 @@ function mainLoop() {
 
     ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
     Renderer.renderWorld(player)
-    // player.rotate();
-    // player.healthbar();
+
     player.registerControls()
     const all = [player, ...bullets.concat(enemies)];
     count.innerHTML = `${enemies.length + 1} Alive`;
+    // const inDrawDistance = [player, ...getParticles(player.pos, all)];
     all.forEach((b, index) => {
         Renderer.renderEnemies(player, b, (x, y) => {
             if (b.type == 'player') {
@@ -148,12 +157,10 @@ function mainLoop() {
 
         })
         for (let i = index + 1; i < all.length; i++) {
-            const ball_1 = all[index], ball_2 = all[i];
-            if (ball_2.id == ball_1.id || (ball_1.type == 'bullet' && ball_2.type == 'bullet')) continue;
-            if (Ball.collision(ball_1, ball_2)) {
-                // console.log(ball_1.type, ball_2.type)
-                const player = ball_1.type == 'player' ? ball_1 : ball_2;
-                const bullet = ball_1.type == 'bullet' ? ball_1 : ball_2;
+            const entity_1 = all[index], entity_2 = all[i];
+            if (entity_2.id == entity_1.id || (entity_1.type == 'bullet' && entity_2.type == 'bullet')) continue;
+            if (ballTags.includes(entity_1.type) && ballTags.includes(entity_2.type) && Ball.collision(entity_1, entity_2)) {
+                const [player, bullet] = entity_1.type == 'player' ? [entity_1, entity_2] : [entity_2, entity_1];
 
                 if (bullet && player && (bullet.damageOnCollision || player.damageOnCollision)) {
                     player.health -= bullet.damage;
@@ -163,14 +170,14 @@ function mainLoop() {
                         player.destroy();
                     continue;
                 }
-                Ball.penetration_resolution(ball_1, ball_2);
-                Ball.collision_resoluion(ball_1, ball_2);
+                Ball.penetration_resolution(entity_1, entity_2);
+                Ball.collision_resoluion(entity_1, entity_2);
             }
         }
         Renderer.renderPlayer((x, y) => player.drawBall(x, y))
-
         b.update();
     })
+
     // Wall.closestPoint(player, wall).subtract(player.pos).drawVector(player.pos.x, player.pos.y, 1, 'red')
     acceleration.innerHTML = `Acceleration: ${Math.round(player.acc.magnitude())}`;
     velocity.innerHTML = `Velocity: ${Math.round(player.vel.magnitude())}`
@@ -178,8 +185,11 @@ function mainLoop() {
 }
 
 function getParticles({ x, y }, particles) {
-    const dx = particles.filter(p => p.pos.x <= Global.drawDistance.x + x && p.pos.x >= x - Global.drawDistance.x - Global.drawDistance.buffer)
-    const dy = dx.filter(p => p.pos.y <= Global.drawDistance.y + y && p.pos.y >= y - Global.drawDistance.y - Global.drawDistance.buffer);
+    Global.drawDistance.x = canvas.width / 2;
+    Global.drawDistance.y = canvas.height / 2;
+
+    const dx = particles.filter(p => p.pos.x <= Global.drawDistance.x + x + Global.drawDistance.buffer && p.pos.x >= x - Global.drawDistance.x - Global.drawDistance.buffer)
+    const dy = dx.filter(p => p.pos.y <= Global.drawDistance.y + y + Global.drawDistance.buffer && p.pos.y >= y - Global.drawDistance.y - Global.drawDistance.buffer);
     return dy;
 }
 
