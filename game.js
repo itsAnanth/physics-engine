@@ -58,11 +58,11 @@ Player.prototype.update = function() {
     pu.apply(this, arguments)
     if (this.pos.x < 0) 
         this.pos = new Vector(0, this.pos.y);
-    else if (this.pos.x > 3000)
+    if (this.pos.x > 3000)
         this.pos = new Vector(3000, this.pos.y);
-    else if (this.pos.y < 0)
+    if (this.pos.y < 0)
         this.pos = new Vector(this.pos.x, 0);
-    else if (this.pos.y > 3000)
+    if (this.pos.y > 3000)
         this.pos = new Vector(this.pos.x, 3000);
 }
 
