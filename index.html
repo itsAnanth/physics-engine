@@ -1,8 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <script src="./SAT/components/Global.js" defer></script>
@@ -11,13 +15,16 @@
     <script src="./SAT/components/Controller.js" defer></script>
     <script src="./SAT/components/objects/Ball.js" defer></script>
     <script src="./SAT/components/objects/Wall.js" defer></script>
-    <script src="./SAT/main.js" defer></script>
+    <script src="./SAT/components/Renderer.js" defer></script>
+    <script src="./game.js" defer></script>
 
     <style>
         * {
             margin: 0;
             padding: 0;
             overflow: hidden;
+            font-family: 'Courier Prime', monospace;
+            user-select: none;
         }
 
         .info-container {
@@ -43,15 +50,48 @@
             opacity: 70%;
             border-radius: 5px;
         }
+
+        #right-container {
+            position: fixed;
+            top: 0;
+            right: 0;
+            color: white;
+            padding: 1%;
+            font-size: xx-large;
+        }
+
+        .game-over {
+            position: fixed;
+            z-index: 999;
+            background-color: #222222;
+            width: 100%;
+            height: 100vh;
+            text-align: center;
+            font-size: 100px;
+            transition: all 2s ease;
+            opacity: 0;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
+
 <body>
+    <div class="game-over" id="go">
+        Game Over
+    </div>
     <div id="info-container" class="info-container">
         <div class="bg"></div>
         <div id="acceleration">Acceleration: 0</div>
         <div id="velocity">Velocity: 0</div>
     </div>
+    <div id="right-container">
+        <div id="count">0 Alive</div>
+    </div>
     <canvas id="canvas"></canvas>
-    
+
 </body>
+
 </html>

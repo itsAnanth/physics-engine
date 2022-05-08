@@ -3,46 +3,67 @@
 class Ball {
     /**
      * Creates a new ball object with collision detection
-     * @param {number} x x coordinate
-     * @param {number} y y coordinate
-     * @param {number} radius radius of the ball
-     * @param {number} mass mass of the ball
-     * @param {boolean} player whether the ball is controllable by user or not
+     * @param {{ 
+     *      x: number, 
+     *      y: number, 
+     *      radius: number, 
+     *      elasticity: number, 
+     *      parent: any[], 
+     *      isPlayer: boolean,
+     *      friction: number,
+     *      damageOnCollision: boolean,
+     *      type: string
+     *      acceleration: number
+     * }} x player object creation payload
      */
-    constructor(x, y, radius, mass, elasticity = 1, player) {
+    constructor({ x, y, radius, mass, elasticity, parent, isPlayer, friction, damageOnCollision, acceleration, color }) {
         /** @type {Vector} */
         this.pos = new Vector(x, y);
         this.vel = new Vector(0, 0);
         this.acc = new Vector(0, 0);
         /** @type {number} */
-        this.r = radius;
+        this.r = radius ?? 10;
         /** @type {number} */
-        this.mass = mass;
+        this.mass = mass || 5;
         this.inverse_mass = (mass <= 0) ? 0 : (1 / mass);
-        this.elasticity = elasticity;
-        this.acceleration = 1;
-        this.player = player || false;
-        Global.balls.push(this);
+        this.elasticity = elasticity ?? 1;
+        this.acceleration = acceleration ?? 1;
+        this.player = isPlayer || false;
+        this.friction = friction ?? Global.FRICTION;
+        this.parent = parent;
+        this.damageOnCollision = damageOnCollision ?? false;
+        this.color = color ?? 'red';
+        parent.push(this);
     }
 
 
     /**
      * main renderer
      */
-    drawBall() {
+    drawBall(x = this.pos.x, y = this.pos.y) {
         ctx.beginPath();
-        ctx.arc(this.pos.x, this.pos.y, this.r, 0, Angle.toRadians(360));
+        ctx.arc(x, y, this.r, 0, Angle.toRadians(360));
         ctx.strokeStyle = "black";
         ctx.stroke();
-        ctx.fillStyle = "red";
+        ctx.fillStyle = this.color;
         ctx.fill();
         ctx.closePath();
+    }
+
+    moveTo(v) {
+        this.vel = Vector.subtract(v, this.pos).unit().multiply(this.acceleration);
+    }
+
+    displayHealth(x = this.pos.x, y = this.pos.y) {
+        ctx.textAlign = 'center';
+        ctx.fillStyle = 'black';
+        ctx.fillText(`HP - ${this.health}`, x, y - this.r - 15);
     }
 
     update() {
         this.acc = this.acc.unit().multiply(this.acceleration);
         this.vel = Vector.add(this.vel, this.acc);
-        this.vel = this.vel.multiply(1 - Global.FRICTION);
+        this.vel = this.vel.multiply(1 - this.friction);
         this.pos = Vector.add(this.pos, this.vel);
     }
 
@@ -53,6 +74,11 @@ class Ball {
         ctx.fillStyle = 'black';
         ctx.fillText(`mass = ${this.mass}`, this.pos.x, this.pos.y - this.r - 15);
         ctx.fillText(`elasticiy = ${this.elasticity}`, this.pos.x, this.pos.y - this.r - 5)
+    }
+
+
+    destroy() {
+        this.parent.splice(this.parent.indexOf(this), 1);
     }
 
     /**
